@@ -1,15 +1,30 @@
-const socket =io()                                               // socket cotian the return value from function IO 
+const socket =io()                                       // socket cotian the return value from function IO 
+
 
 //Elements
 const $messageForm = document.querySelector('#message-form');
 const $messageFormInput = $messageForm.querySelector('input');
 const $messageFormButton = $messageForm.querySelector('button');
 const $locationButton = document.querySelector('#send-location');
+const $messages = document.querySelector('#messages');
+
+//Templates
+const messageTemplate=document.querySelector('#message-template').innerHTML
+const locationTemplate=document.querySelector('#location-template').innerHTML
 
 
-
-socket. on('message', (message) =>{
+//Rendering Messages
+socket. on('message', (message) =>{     
     console.log(message);
+    const html =Mustache.render(messageTemplate,{ message:message.text , createdAt:moment(message.createdAt).format('h:mm A')})   
+    $messages.insertAdjacentHTML('beforeend', html)
+})
+
+//Rendering Location
+socket.on('locationMessage',(locationMessage)=>{
+   console.log(locationMessage);
+   const html =Mustache.render(locationTemplate,{ url:locationMessage.url  , createdAt:moment(locationMessage.createdAt).format('h:mm A') })         
+   $messages.insertAdjacentHTML('beforeend', html) 
 })
  
 
@@ -49,7 +64,7 @@ document.querySelector('#send-location').addEventListener('click',()=>{
                     return console.log(error)
                 }
                 $locationButton.removeAttribute('disabled')      //enable Location Button once it sent 
-                console.log('Location was shared  ');
+                console.log('Location was shared');
 
             })
     })
