@@ -1,4 +1,5 @@
-const socket =io()                                       // socket cotian the return value from function IO 
+
+ const socket =io()                                       // socket cotian the return value from function IO 
 
 
 //Elements
@@ -11,19 +12,31 @@ const $messages = document.querySelector('#messages');
 //Templates
 const messageTemplate=document.querySelector('#message-template').innerHTML
 const locationTemplate=document.querySelector('#location-template').innerHTML
+const sidebartemplate=document.querySelector('#sidebar-template').innerHTML
 
 
-//Rendering Messages
+//Options 
+const { username, room }=Qs.parse(location.search, { ignoreQueryPrefix: true })    //Qs for parse query String values
+
+//Rendering Messages 
 socket. on('message', (message) =>{     
     console.log(message);
-    const html =Mustache.render(messageTemplate,{ message:message.text , createdAt:moment(message.createdAt).format('h:mm A')})   
+    const html =Mustache.render(messageTemplate,{
+        username: message.username,
+         message:message.text, 
+         createdAt:moment(message.createdAt).format('h:mm A')})   
+
     $messages.insertAdjacentHTML('beforeend', html)
 })
 
 //Rendering Location
 socket.on('locationMessage',(locationMessage)=>{
    console.log(locationMessage);
-   const html =Mustache.render(locationTemplate,{ url:locationMessage.url  , createdAt:moment(locationMessage.createdAt).format('h:mm A') })         
+   const html =Mustache.render(locationTemplate,{ 
+       username:locationMessage.username,
+       url:locationMessage.url,
+       createdAt:moment(locationMessage.createdAt).format('h:mm A') })         
+   
    $messages.insertAdjacentHTML('beforeend', html) 
 })
  
@@ -74,3 +87,21 @@ document.querySelector('#send-location').addEventListener('click',()=>{
 
 })
 
+
+socket.emit('join', { username, room },(error)=>{          
+ // Event Acknowledment
+  console.log(error);
+  if (error){
+    alert(error);
+    location.href='/'
+  }
+} ) 
+
+socket.on('roomData', ({ room, users}) => {
+      const html=Mustache.render(sidebartemplate, {
+        room, users      })
+        document.querySelector('#sidebar').innerHTML =html
+
+     
+})
+ 
