@@ -1,5 +1,5 @@
 
- const socket =io()                                       // socket cotian the return value from function IO 
+const socket =io()                                       // socket cotian the return value from function IO 
 
 
 //Elements
@@ -13,7 +13,30 @@ const $messages = document.querySelector('#messages');
 const messageTemplate=document.querySelector('#message-template').innerHTML
 const locationTemplate=document.querySelector('#location-template').innerHTML
 const sidebartemplate=document.querySelector('#sidebar-template').innerHTML
+ 
+const autoScroll = () =>{
+       // New Message
+      const $newmessage =$messages.lastElementChild                           // assgin the last new message
+      
+      // Get the height of the new message
+      const newMessageStyles = getComputedStyle( $newmessage)                //returns object of all the CSS properties of the new message
+      const newMessageMargin = parseInt(newMessageStyles.marginBottom)       //converting the marginBottom property from the computed styles into an integer
+      const newMessageHeight = $newmessage.offsetHeight + newMessageMargin   //calculates and stores the combined height of the new message element, considering both its content and any bottom margin that should be accounted for in layout 
+      
+      // Get The Visable height 
+      const visibleHeight =$messages.offsetHeight 
+ 
+      // Get the Height of messages Container
+      const containerHeight = $messages.scrollHeight                         //  calculating the total scrollable height of an HTML element 'messages'
 
+      //The height we scrolled !!
+      const scrollOffset = $messages.scrollTop + visibleHeight               // calculating the total distance from the top of all messages to the bottom of the messages
+
+      if(containerHeight - newMessageHeight <= scrollOffset){
+          $messages.scrollTop=$messages.scrollHeight
+      }
+       
+}
 
 //Options 
 const { username, room }=Qs.parse(location.search, { ignoreQueryPrefix: true })    //Qs for parse query String values
@@ -27,6 +50,7 @@ socket. on('message', (message) =>{
          createdAt:moment(message.createdAt).format('h:mm A')})   
 
     $messages.insertAdjacentHTML('beforeend', html)
+    autoScroll()
 })
 
 //Rendering Location
@@ -38,6 +62,7 @@ socket.on('locationMessage',(locationMessage)=>{
        createdAt:moment(locationMessage.createdAt).format('h:mm A') })         
    
    $messages.insertAdjacentHTML('beforeend', html) 
+   autoScroll()
 })
  
 
